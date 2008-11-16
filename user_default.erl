@@ -46,6 +46,9 @@ mk(Dir) ->
 		  {'EXIT', {undef, _}} ->
 		      %% skip modules w/o EUnit entry point
 		      ok;
+		  ok ->
+		      %% (EUnit will normally print result)
+		      ok;
 		  Res ->
 		      io:format("EUnit: ~p -> ~p\n", [M, Res])
 	      end
