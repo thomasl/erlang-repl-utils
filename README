@@ -1,7 +1,18 @@
 Simple utilities for interactive erlang development.
 
-user_default: provide this in your .erlang
+Run make and see below for how to install.
+
+1. user_default: provide this in your .erlang
 
 code:load_abs("$PATH/user_default").
 
 See also http://erlang.org/doc/man/shell_default.html
+
+The user_default module here and there uses user_default_config, which
+keeps track of persistent configuration variables. user_default:mk/0
+uses this, for instance. See ?home_defaults in user_default_config for a
+config table location variable you may want to update.
+
+2. .emacs
+
+OK, this one is probably mostly useful to me.

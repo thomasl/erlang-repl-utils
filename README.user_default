@@ -1,0 +1,21 @@
+Guide for user_default:
+
+mk() -- run make, load changed modules, run unit tests if available
+mk0() -- run make, load changed modules
+
+l()     -- reload all changed modules on current node
+nl()   -- reload all changed modules on all nodes
+mm() -- list changed modules
+
+u(M) -- run eunit on module M and load
+u() -- run eunit and load on all changed modules
+
+help() -- show help text
+dbg*() -- collection of functions for running dbg
+  (yes, should be documented further :-)
+
+Note: we also provide a semi-persistent configuration utility. See
+user_default_config, and the following to get started:
+
+user_default_config:list_config(). -> list key value pairs
+user_default_config:config_file() -> location of table
