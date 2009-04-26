@@ -1,0 +1,7 @@
+Simple utilities for interactive erlang development.
+
+user_default: provide this in your .erlang
+
+code:load_abs("$PATH/user_default").
+
+See also http://erlang.org/doc/man/shell_default.html
