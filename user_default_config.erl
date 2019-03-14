@@ -11,6 +11,10 @@
 %%   with something perhaps more flexible and useful
 %%
 %% EXTENSIONS
+%% - look for config tab in a search path, not just a single dir
+%%   * perhaps combine multiple tables? 
+%%   * use case: run mk() over several dirs
+%% - run make in several repositories, as configured
 %% - can we make this visible to erlc somehow?
 %%   * erlc is just a wrapper around compile
 %% - scripted keys, e.g., "$HOME" expanding to current home dir

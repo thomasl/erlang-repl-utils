@@ -1,0 +1,9 @@
+%% -*- Erlang -*-
+
+io:format("user_default -> ~p\n",
+	  [code:load_abs("/Users/tl/git/erlang-repl-utils/user_default")]).
+% code:load_abs("/Users/tl/git/erlang-repl-utils/user_default_config").
+io:format("user_default_config -> ~p\n",
+	  [code:load_abs("/Users/tl/git/erlang-repl-utils/user_default_config")]).
+io:format(".erlang loaded\n\n", []).
+
