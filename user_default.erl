@@ -115,13 +115,15 @@ mm() ->
 mm(Node) ->
     rpc:call(Node, ?MODULE, mm, []).
 
-%% @doc Modified modules for 'recent' OTP, which provides code:module_status/1
-%%
-%% UNFINISHED -
-%% Note: this is a bit sloppy since we only consider changed modules and there
-%% are corner cases like status 'removed'. 
+%% List of all modified modules.
 
 modified_modules() ->
+    code:modified_modules().
+
+%% @doc Modified modules for 'recent' OTP, which provides code:module_status/1
+%% - however, OBSOLETE since code:modified_modules/0 already exists
+
+new_modified_modules() ->
     [ M || {M, _} <- code:all_loaded(),
 	   code:module_status(M) == modified ].
 
