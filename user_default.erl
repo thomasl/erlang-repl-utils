@@ -115,9 +115,20 @@ mm() ->
 mm(Node) ->
     rpc:call(Node, ?MODULE, mm, []).
 
-%% @doc Here is the actual work horse.
+%% @doc Modified modules for 'recent' OTP, which provides code:module_status/1
+%%
+%% UNFINISHED -
+%% Note: this is a bit sloppy since we only consider changed modules and there
+%% are corner cases like status 'removed'. 
 
 modified_modules() ->
+    [ M || {M, _} <- code:all_loaded(),
+	   code:module_status(M) == modified ].
+
+%% @doc Here is the actual work horse for OLD OTP. Note that this required
+%% compile time as an attribute
+
+old_modified_modules() ->
     [M || {M, _} <-  code:all_loaded(), module_modified(M) == true].
 
 module_modified(Module) ->
