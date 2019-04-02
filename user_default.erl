@@ -1,9 +1,10 @@
 -module(user_default).
 -export([l/0, nl/0, mm/0]).
+-export([p/1]).
 -export([help/0,dbgtc/1, dbgon/1, dbgon/2,
           dbgadd/1, dbgadd/2, dbgdel/1, dbgdel/2, dbgoff/0]).
 
--compile(export_all).
+%-compile(export_all).
 
 -import(io, [format/1]).
 
@@ -57,6 +58,11 @@ mk(Dir) ->
 
 config_value() ->		      
     user_default_config:get_key(make_dir, "make-dir", ".").
+
+%% @doc Print entire value
+
+p(X) ->
+    io:format("~p\n", [X]).
 
 %% @doc EUnit for module M.
 
