@@ -4,15 +4,15 @@
 
 ERLC=erlc
 ERLC_OPTS=+nowarn_unused_vars +export_all
-ERL_SRC = \
-	user_default.erl \
-	user_default_config.erl
-OBJS := $(patsubst %.erl,%.beam,$(ERL_SRC))
+
+SRC := $(wildcard ./*.erl)
+INC := $(wildcard ./*.hrl)
+OBJ := $(SRC:./%.erl=./%.beam)
 
 %.beam: %.erl
 	$(ERLC) $(ERLC_OPTS) $<
 
-all:	$(OBJS)
+all:	$(OBJ)
 
 clean:
 	rm -f *.beam
