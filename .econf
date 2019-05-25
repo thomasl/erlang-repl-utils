@@ -1,0 +1,20 @@
+%% -*- Erlang -*-
+%%
+%% This is a preliminary version of an 'econf' file.
+%%
+%% - no multiple values for keys
+
+%% mk() runs makefiles in these directories
+{mkdir, [".",
+	 "../erlang-opprec",
+	 "../erlang-lex"]}.
+
+%% added to path on startup
+{ebin, ["../erlang-opprec/ebin",
+	"../erlang-lex/ebin",
+	"../erlang-repl-utils/",
+	"./ebin"
+	]}.
+
+
+	

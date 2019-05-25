@@ -1,12 +1,28 @@
 -module(user_default).
 -export([l/0, nl/0, mm/0]).
--export([p/1]).
+-export([p/1, s/1]).
 -export([help/0,dbgtc/1, dbgon/1, dbgon/2,
           dbgadd/1, dbgadd/2, dbgdel/1, dbgdel/2, dbgoff/0]).
-
+-export(
+   [load_conf/0,
+    extend_paths/0]
+  ).
 %-compile(export_all).
 
 -import(io, [format/1]).
+
+
+load_conf() ->
+    Conf = "./.econf",
+    user_default_config:load_config(Conf).
+
+extend_paths() ->    
+    case user_default_config:get(ebin) of
+	{found, Paths} ->
+	    code:add_pathsa(Paths);
+	not_found ->
+	    []
+    end.
 
 %% @doc make in current dir (see also mk/0 for more flex)
 
@@ -31,16 +47,26 @@ mkl() ->
 %%  gets difficult to summarize where code is up-to-date.
 
 mk() ->
-    Dir = config_value(),
-    mk(Dir).
+    Dirs = config_value(),
+    mk_dirs(Dirs).
+
+mk_dirs(Dirs) ->
+    lists:foreach(
+      fun(Dir) ->
+	      io:format("Make ~s\n", [Dir]),
+	      mk(Dir)
+      end,
+      Dirs).
 
 mk(Dir) ->
     io:format("~s\n", 
 	      [os:cmd(
 		 lists:flatten(
-		   io_lib:format("(cd ~s && make)", [Dir])))]),
+		   io_lib:format("(cd ~s && make)", [quote(Dir)])))]),
     Ms = mm(),
     l(),
+    %% UNFINISHED
+    %% - is this useful? not being used
     lists:foreach(
       fun(M) ->
 	      case catch M:test() of
@@ -56,13 +82,24 @@ mk(Dir) ->
       end,
       Ms).
 
-config_value() ->		      
-    user_default_config:get_key(make_dir, "make-dir", ".").
+%% UNFINISHED
+%% - this should 
+
+quote(Dir) ->
+    Dir.
+
+config_value() ->
+    user_default_config:get(mkdir, []).
 
 %% @doc Print entire value
 
 p(X) ->
     io:format("~p\n", [X]).
+
+%% @doc Print string (possibly io-list, so p/1 gets ugly)
+
+s(Str) ->
+    io:format("~s\n", [Str]).
 
 %% @doc EUnit for module M.
 
@@ -126,15 +163,11 @@ mm(Node) ->
 modified_modules() ->
     code:modified_modules().
 
-%% @doc Modified modules for 'recent' OTP, which provides code:module_status/1
-%% - however, OBSOLETE since code:modified_modules/0 already exists
-
-new_modified_modules() ->
-    [ M || {M, _} <- code:all_loaded(),
-	   code:module_status(M) == modified ].
-
 %% @doc Here is the actual work horse for OLD OTP. Note that this required
 %% compile time as an attribute
+%%
+%% OBSOLETE
+%% - we keep it around for older versions of OTP
 
 old_modified_modules() ->
     [M || {M, _} <-  code:all_loaded(), module_modified(M) == true].
