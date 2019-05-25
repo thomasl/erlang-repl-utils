@@ -189,12 +189,16 @@ handle_call(Other, _From, State) ->
 %%
 
 server_load_config(File) ->
-    case file:consult(File) of
-	{ok, Terms} ->
-	    make_config(Terms);
-	Err ->
-	    Err
-    end.
+    Cfg_terms =
+	case file:consult(File) of
+	    {ok, Terms} ->
+		Terms;
+	    Err ->
+		io:format("Load config ~s -> ~p, config cleared/empty\n",
+			  [File, Err]),
+		[]
+	end,
+    make_config(Cfg_terms).
 
 server_save_config(Conf, File) ->
     ?dbg("Server save config: stubbed\n", []),
