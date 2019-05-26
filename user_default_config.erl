@@ -15,7 +15,16 @@
 %% - only explicit config files (in this API)
 %% - should have env.vars too
 %%
-%% We use a gen_server to manage this.
+%% We use a gen_server to manage this. The size of the config is
+%% assumed to be negligible.
+%%
+%% Current status: MUCH nicer than the old method of using ets + tab2file
+%%
+%% UNFINISHED
+%% - save_config/0,1 uses a 'modified' flag to control whether to save
+%%   stuff or not ... not quite satisfactory
+%%   * we want to avoid overwriting the old config file by mistake
+%%   * overwrite does not preserve comments
 
 -module(user_default_config).
 -behaviour(gen_server).
@@ -40,7 +49,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
 	 terminate/2, code_change/3]).
 
--record(state, {config_file, keys, modified}).
+-record(state, {config_file, keys=empty(), modified}).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
@@ -153,11 +162,11 @@ handle_call({save_config, File}, From, State) ->
 	    {reply, Reply, State#state{modified=false}};
 	ConfigFile ->
 	    case State#state.modified of
-		false ->
-		    {reply, {ok, unchanged}, State};
 		true ->
 		    Reply = server_save_config(State#state.keys, File),
-		    {reply, Reply, State#state{modified=false}}
+		    {reply, Reply, State#state{modified=false}};
+		_ ->
+		    {reply, {ok, unchanged}, State}
 	    end
     end;
 handle_call(save_config, From, State) ->
@@ -179,7 +188,7 @@ handle_call({get, Key}, From, State) ->
     {reply, Reply, State};
 handle_call({put, Key, Value}, From, State) ->
     {Reply, NewState} = put_key(Key, Value, State),
-    {reply, Reply, NewState};
+    {reply, Reply, NewState#state{modified=true}};
 handle_call(get_all_keys, _From, State) ->
     Reply = get_all_keys(State),
     {reply, Reply, State};
@@ -200,9 +209,30 @@ server_load_config(File) ->
 	end,
     make_config(Cfg_terms).
 
+%% NB: file is saved on host where gen_server is running. Probably
+%% not a killer issue. Right ...?
+%%
+%% UNFINISHED
+%% - many io:format/3 seems costly, but we assume the config is small
+%%   and that this op is infrequent
+
 server_save_config(Conf, File) ->
-    ?dbg("Server save config: stubbed\n", []),
-    ok.
+    KVs = lists:sort(dict:to_list(Conf)),
+    case file:open(File, [write]) of
+	{ok, FD} ->
+	    io:format(FD, "%% -*- Erlang -*-\n\n", []),
+	    lists:foreach(
+	      fun(KV) ->
+		      io:format(FD, "~p.\n", [KV])
+	      end,
+	      KVs),
+	    ok = file:close(FD),
+	    ok;
+	Err ->
+	    io:format("Error when saving to ~s -> ~p\n",
+		      [File, Err]),
+	    Err
+    end.
 
 get_key(Key, State) ->
     case dict:find(Key, State#state.keys) of
@@ -213,7 +243,7 @@ get_key(Key, State) ->
     end.
 
 get_all_keys(State) ->
-    {ok, dict:to_list(State#state.keys)}.
+    {ok, lists:sort(dict:to_list(State#state.keys))}.
 
 put_key(Key, Val, State) ->
     NewDict = dict:store(Key, Val, State#state.keys),
@@ -227,6 +257,11 @@ put_key(Key, Val, State) ->
 
 make_config(Terms) ->
     {ok, dict:from_list(Terms)}.
+
+%%
+
+empty() ->
+    dict:new().
 
 %%--------------------------------------------------------------------
 %% Function: handle_cast(Msg, State) -> {noreply, State} |
