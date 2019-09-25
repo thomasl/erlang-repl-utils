@@ -10,11 +10,6 @@ io:format(
 	code:load_abs("/Users/tl/git/erlang-repl-utils/user_default_config"))
   ]).
 io:format(
-  "user_default_config2 -> ~p\n",
-  [(catch 
-	code:load_abs("/Users/tl/git/erlang-repl-utils/user_default_config2"))
-  ]).
-io:format(
   "load config -> ~p\n", 
   [(catch user_default:load_conf())
   ]).
