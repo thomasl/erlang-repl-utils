@@ -7,10 +7,14 @@
    [load_conf/0,
     extend_paths/0]
   ).
+-export([rr/0]).
 %-compile(export_all).
 
 -import(io, [format/1]).
 
+%% - should add configurable compiler flags to use by default?
+%%   * can we sneak that into Makefile somehow?
+%%   * perhaps per-file? e.g., switch debug on/off ...
 
 load_conf() ->
     Conf = "./.econf",
@@ -58,11 +62,19 @@ mk_dirs(Dirs) ->
       end,
       Dirs).
 
+fmt(Str, Xs) ->
+    case catch io:format(Str, Xs) of
+	ok ->
+	    ok;
+	Err ->
+	    io:format("Error ~P\n", [Err])
+    end.
+
 mk(Dir) ->
-    io:format("~s\n", 
-	      [os:cmd(
-		 lists:flatten(
-		   io_lib:format("(cd ~s && make)", [quote(Dir)])))]),
+    fmt("~s\n", 
+	[os:cmd(
+	   lists:flatten(
+	     io_lib:format("(cd ~s && make)", [quote(Dir)])))]),
     Ms = mm(),
     l(),
     %% UNFINISHED
@@ -212,6 +224,22 @@ find_module_file(Path) ->
 		    NewPath
 	    end
     end.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% rr() - load all record definitions in all beam files
+%%
+%% UNFINISHED
+%% - rr/1 is not an exported function from shell.erl
+%%   * shell:shell_cmd/6 might be abused to do it, but there are many
+%%     params that need to be passed correctly
+%%   * perhaps better left internal
+
+rr() ->
+    lists:foreach(
+      fun(M) ->
+	      io:format("rr(~p) -> ~p\n", [M, c:rr(M)])
+      end,
+      [ M || {M, _Obj} <- code:all_loaded()]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
