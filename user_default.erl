@@ -67,7 +67,7 @@ fmt(Str, Xs) ->
 	ok ->
 	    ok;
 	Err ->
-	    io:format("Error ~P\n", [Err])
+	    io:format("Error ~p\n", [Err])
     end.
 
 mk(Dir) ->
