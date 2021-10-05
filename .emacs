@@ -6,6 +6,17 @@
 ; (load-file "~/emacs/erlang-start.el")
 ; (load-file "~/emacs/erlang.el")
 
+;;;; Modernized loading of erlang emacs mode
+;;;;  This assumes you have cloned this repo in your ~/git/ directory
+;;;;
+;;;; NB: better alternative: add the path to the OTP tools dir, but I don't know
+;;;; how to reliably do that at install time
+
+(add-to-list 'load-path "~/git/erlang-repl-utils/emacs")
+(require 'erlang-start)
+
+;;;;
+
 (setq
  auto-mode-alist
  (append 
