@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t -*-
 ;; erlang-start.el --- Load this file to initialize the Erlang package.
 
 ;; Copyright (C) 1998  Ericsson Telecom AB
