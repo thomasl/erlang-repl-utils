@@ -1,7 +1,6 @@
 ;;; .emacs --- Personal Emacs init file  -*- lexical-binding: t -*-
 
 ;; Updated 2026-11-02 for GNU Emacs 31 (Homebrew) and Erlang/OTP 29.
-;; The previous version is kept as ~/.emacs.bak-2026-11-02.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Packages (GNU ELPA, NonGNU ELPA and MELPA)
@@ -122,6 +121,25 @@
 (keymap-global-set "C-x g"       #'goto-line)
 (keymap-global-set "C-x C-k"     #'copy-region-as-kill)
 (keymap-global-set "M-F"         #'fill-paragraph)
+
+;; Claude -- added these to bind keys properly with MacOS and Swedish keyboard
+;; - new emacs appears to use these for other purposes now, not what we want
+;; - also set Terminals > Settings > Profiles > Keyboard > "Use Option as Meta Key"
+;;   to use left key,
+;; - if NOT desired, do not set ns-alternate-modifier and ns-right-alternate-modifier
+;;   (see below)
+
+(defvar ns-alternate-modifier)        ; defined only in GUI Emacs on macOS
+(defvar ns-right-alternate-modifier)
+
+(when (eq system-type 'darwin)
+  (when (featurep 'ns)
+    (setq ns-alternate-modifier 'meta
+          ns-right-alternate-modifier 'none))
+  (keymap-set key-translation-map "M-8" "[")
+  (keymap-set key-translation-map "M-9" "]")
+  (keymap-set key-translation-map "M-(" "{")
+  (keymap-set key-translation-map "M-)" "}"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Editing
