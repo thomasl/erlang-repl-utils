@@ -1,4 +1,4 @@
-;;
+;;  -*- lexical-binding: t; -*-
 ;; %CopyrightBegin%
 ;;
 ;; Copyright Ericsson AB 2010-2020. All Rights Reserved.
