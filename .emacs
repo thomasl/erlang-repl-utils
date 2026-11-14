@@ -156,4 +156,54 @@
 ;; No backup files ("~" files)
 (setq make-backup-files nil)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Buffer stash
+;;
+;; C-x C-c first asks to save changed files, then saves all buffers
+;; (also unsaved changes) to the hidden directory
+;; ~/.emacs.d/.buffer-stash/, then stops Emacs.  At the next start,
+;; the buffers are restored and the hidden directory is deleted.
+;; The library is ~/.emacs.d/lisp/buffer-stash.el.
+
+(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
+(require 'buffer-stash)
+
+(defun my-stash-buffers-and-quit (&optional arg)
+  "Save and stash all buffers, then stop Emacs like \\[save-buffers-kill-terminal].
+First Emacs asks \"Save file ...?\" for each changed file buffer.
+Then it asks about each buffer that is too large to stash.  Then it
+stashes the buffers and exits.  It does not ask the save questions a
+second time, because the unsaved changes are in the stash.  With the
+prefix ARG, all file buffers are saved without a question.
+
+If you cancel the exit, the new stash is removed again, so that an
+old state does not come back at the next start.  In an emacsclient
+frame, Emacs does not stop, so no stash is made."
+  (interactive "P")
+  (cond
+   ((frame-parameter nil 'client)
+    ;; Only this client frame closes; the Emacs server continues.
+    (save-buffers-kill-terminal arg))
+   ((condition-case err
+        (progn (buffer-stash-save arg) t)
+      (error
+       (message "Cannot stash buffers: %s" (error-message-string err))
+       (sit-for 2)
+       nil))
+    ;; If Emacs exits, `kill-emacs' does not run the unwind form.
+    ;; The unwind form runs only if you cancel the exit.
+    (unwind-protect
+        (when (buffer-stash-confirm-exit)
+          (kill-emacs))
+      (buffer-stash-discard-last-save)))
+   (t
+    ;; The stash failed: quit the usual way, with all its questions.
+    (save-buffers-kill-terminal arg))))
+
+(keymap-global-set "C-x C-c" #'my-stash-buffers-and-quit)
+
+;; Restore the stashed buffers at startup.  The hook runs after Emacs
+;; opens the files given on the command line, so it does not replace them.
+(add-hook 'emacs-startup-hook #'buffer-stash-restore)
+
 ;;; .emacs ends here
