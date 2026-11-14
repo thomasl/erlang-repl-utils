@@ -1,23 +1,26 @@
-# Note: we just dump the defaults in this directory, then 
-#   make export-default
-# to put them in the ~/defaults directory, if desired
+# Build the beam files in this directory.  ~/.erlang loads them from
+# here (see .erlang).
+#
+#   make                 compile
+#   make clean           remove the beam files
+#   make export-default  copy the beam files to ~/defaults, if desired
 
-ERLC=erlc
-ERLC_OPTS=+nowarn_unused_vars +export_all
+ERLC ?= erlc
+ERLC_OPTS ?= +debug_info
 
-SRC := $(wildcard ./*.erl)
-INC := $(wildcard ./*.hrl)
-OBJ := $(SRC:./%.erl=./%.beam)
+SRC := $(wildcard *.erl)
+OBJ := $(SRC:.erl=.beam)
+
+.PHONY: all clean export-default
+
+all: $(OBJ)
 
 %.beam: %.erl
 	$(ERLC) $(ERLC_OPTS) $<
 
-all:	$(OBJ)
-
 clean:
 	rm -f *.beam
 
-export-default:
+export-default: all
+	mkdir -p ~/defaults
 	cp *.beam ~/defaults
-
-

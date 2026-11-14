@@ -1,20 +1,18 @@
 %% -*- Erlang -*-
 %%
-%% This is a preliminary version of an 'econf' file.
+%% Example config file.  user_default reads the file .econf in the
+%% directory where Erlang is started.
 %%
-%% - no multiple values for keys
+%% Each term is {Key, Value}.  If a key occurs more than once, the
+%% last value is used.
 
-%% mk() runs makefiles in these directories
+%% mk() runs make in these directories
 {mkdir, [".",
-	 "../erlang-opprec",
-	 "../erlang-lex"]}.
+         "../erlang-opprec",
+         "../erlang-lex"]}.
 
-%% added to path on startup
+%% These directories are added to the code path at startup
 {ebin, ["../erlang-opprec/ebin",
-	"../erlang-lex/ebin",
-	"../erlang-repl-utils/",
-	"./ebin"
-	]}.
-
-
-	
+        "../erlang-lex/ebin",
+        "../erlang-repl-utils/",
+        "./ebin"]}.

@@ -1,21 +1,16 @@
 %% -*- Erlang -*-
+%%
+%% Example ~/.erlang file.  Set Dir to the directory that contains the
+%% beam files of user_default and user_default_config.
 
-io:format(
-  "user_default -> ~p\n",
-  [(catch code:load_abs("/Users/tl/git/erlang-repl-utils/user_default"))
-  ]).
-io:format(
-  "user_default_config -> ~p\n",
-  [(catch
-	code:load_abs("/Users/tl/git/erlang-repl-utils/user_default_config"))
-  ]).
-io:format(
-  "load config -> ~p\n", 
-  [(catch user_default:load_conf())
-  ]).
-io:format(
-  "path extended with -> ~p\n", 
-  [(catch user_default:extend_paths())
-  ]).
-io:format(".erlang loaded\n\n", []).
+Dir = "/Users/tl/git/erlang-repl-utils".
 
+[io:format("~p -> ~p\n", [M, code:load_abs(filename:join(Dir, M))])
+ || M <- [user_default, user_default_config]].
+
+%% Read ./.econf, then add its 'ebin' directories to the code path.
+io:format("load config -> ~p\n",
+          [try user_default:load_conf() catch C1:R1 -> {C1, R1} end]).
+io:format("path extended with -> ~p\n",
+          [try user_default:extend_paths() catch C2:R2 -> {C2, R2} end]).
+io:format(".erlang loaded\n\n").
