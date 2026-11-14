@@ -204,6 +204,10 @@ frame, Emacs does not stop, so no stash is made."
 
 ;; Restore the stashed buffers at startup.  The hook runs after Emacs
 ;; opens the files given on the command line, so it does not replace them.
+;; When a stash waits, do not show the startup screen: it comes after
+;; the hook and would cover the restored current buffer.
+(when (buffer-stash-pending-p)
+  (setq inhibit-startup-screen t))
 (add-hook 'emacs-startup-hook #'buffer-stash-restore)
 
 ;;; .emacs ends here

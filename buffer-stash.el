@@ -5,9 +5,6 @@
 ;; Package-Requires: ((emacs "27.1"))
 ;; Keywords: convenience, files
 
-;; Install in ~/.emacs.d/lisp/
-;; See also .emacs for usage
-
 ;;; Commentary:
 
 ;; This library saves the state of all buffers to a hidden directory
@@ -38,6 +35,8 @@
 ;;                          deletes the directory.  If an error occurs,
 ;;                          it keeps the directory, so that no data is
 ;;                          lost, and shows a warning.
+;; `buffer-stash-pending-p' Returns non-nil if a stash waits to be
+;;                          restored.
 ;; `buffer-stash-confirm-exit'
 ;;                          Asks the last questions before Emacs exits
 ;;                          after a stash.  Returns non-nil if Emacs
@@ -72,11 +71,20 @@
 ;;         (buffer-stash-discard-last-save))))
 ;;
 ;;   (keymap-global-set "C-x C-c" #'my-stash-buffers-and-quit)
+;;
+;;   (when (buffer-stash-pending-p)
+;;     (setq inhibit-startup-screen t))
 ;;   (add-hook 'emacs-startup-hook #'buffer-stash-restore)
 ;;
 ;; Use `emacs-startup-hook' for the restore, not a direct call.  The
 ;; hook runs after Emacs opens the files on the command line, so the
 ;; restore does not replace them.
+;;
+;; Turn off the startup screen when a stash waits (the `when' form
+;; above).  If you start Emacs without a file, Emacs shows the startup
+;; screen after `emacs-startup-hook', and the startup screen then
+;; covers the restored current buffer.  When there is no stash, the
+;; startup screen shows as usual.
 ;;
 ;; Do not call `save-buffers-kill-terminal' after `buffer-stash-save'.
 ;; It asks the save questions a second time, and it asks "Modified
@@ -166,7 +174,8 @@
 ;; After the restore, that buffer is shown in the selected window.  If
 ;; you start Emacs with a file on the command line, that file stays in
 ;; the window.  Set `buffer-stash-select-current' to nil to turn this
-;; off.
+;; off.  For this to operate at startup, turn off the startup screen
+;; when a stash waits (see "Installation").
 ;;
 ;;;; Size limit
 ;;
@@ -912,6 +921,19 @@ text is in the stash:
       ('dired (buffer-stash--restore-dired entry))
       ('text  (buffer-stash--restore-text entry (or text "")))
       (kind   (error "Unknown entry type %S" kind)))))
+
+;;;###autoload
+(defun buffer-stash-pending-p ()
+  "Return non-nil if a stash waits to be restored.
+Use this in your init file to turn off the startup screen when there
+is a stash.  The startup screen comes after `emacs-startup-hook', so
+it covers the buffer that `buffer-stash-restore' shows:
+
+  (when (buffer-stash-pending-p)
+    (setq inhibit-startup-screen t))"
+  (file-exists-p (expand-file-name buffer-stash--index-name
+                                   (file-name-as-directory
+                                    (buffer-stash--dir)))))
 
 ;;;###autoload
 (defun buffer-stash-restore ()
