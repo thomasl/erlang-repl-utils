@@ -1,4 +1,4 @@
-;;; .emacs --- Personal Emacs init file  -*- lexical-binding: t -*-
+;;; .emacs --- Personal Emacs init file  -*- lexical-binding: t; coding: utf-8 -*-
 
 ;; Updated 2026-11-02 for GNU Emacs 31 (Homebrew) and Erlang/OTP 29.
 
@@ -122,24 +122,70 @@
 (keymap-global-set "C-x C-k"     #'copy-region-as-kill)
 (keymap-global-set "M-F"         #'fill-paragraph)
 
-;; Claude -- added these to bind keys properly with MacOS and Swedish keyboard
-;; - new emacs appears to use these for other purposes now, not what we want
-;; - also set Terminals > Settings > Profiles > Keyboard > "Use Option as Meta Key"
-;;   to use left key,
-;; - if NOT desired, do not set ns-alternate-modifier and ns-right-alternate-modifier
-;;   (see below)
+;; Swedish keyboard on macOS
+;;
+;; On a Swedish Mac keyboard, these characters need the Option key:
+;;
+;;   @  Option-2          [  Option-8          {  Option-Shift-8
+;;   $  Option-4          ]  Option-9          }  Option-Shift-9
+;;   |  Option-7          \  Option-Shift-7    ~  Option-¨
+;;
+;; When the Option key is Meta, Emacs gets a Meta key in place of the
+;; character.  Thus Emacs must translate these Meta keys back to the
+;; characters.  The function below does this.
+;;
+;; - GUI Emacs: the left Option key is Meta, and the right Option key
+;;   types the characters as usual.
+;; - Emacs in Terminal: set Terminal > Settings > Profiles > Keyboard >
+;;   "Use Option as Meta Key".
+;; - If you do not want the left Option key as Meta, remove the
+;;   `setq' of `ns-alternate-modifier' and `ns-right-alternate-modifier'.
+;;
+;; The translations replace these default Meta keys: M-2, M-4, M-7,
+;; M-8 and M-9 (digit arguments; use C-2 and so on), M-/
+;; (`dabbrev-expand'), M-( (`insert-parentheses') and M-)
+;; (`move-past-close-and-reindent').
+;;
+;; Not translated: Option-< also types "|", but M-< is
+;; `beginning-of-buffer'.  The old "Swedish - Legacy" layout types "@"
+;; with Option-', which is not translated.
 
 (defvar ns-alternate-modifier)        ; defined only in GUI Emacs on macOS
 (defvar ns-right-alternate-modifier)
 
-(when (eq system-type 'darwin)
+(defconst my-swedish-mac-meta-keys
+  '(("M-2" . "@")
+    ("M-4" . "$")
+    ("M-7" . "|")
+    ;; Shift-7 is "/", so Option-Shift-7 comes as M-/.
+    ("M-/" . "\\")
+    ("M-8" . "[")
+    ("M-9" . "]")
+    ;; Shift-8 is "(" and Shift-9 is ")".
+    ("M-(" . "{")
+    ("M-)" . "}")
+    ;; "¨" is the key to the right of "å".
+    ("M-\N{DIAERESIS}" . "~"))
+  "Meta keys that are translated to characters for a Swedish Mac keyboard.
+Each element is (KEY . CHARACTER).  KEY is the key that Emacs gets
+when Option is Meta, and CHARACTER is the character that the Option
+key types on a Swedish keyboard.")
+
+(defun my-swedish-mac-keyboard ()
+  "Set up Emacs for a Swedish keyboard on macOS.
+In GUI Emacs, make the left Option key Meta and the right Option key
+a normal Option key.  Then translate the Meta keys in
+`my-swedish-mac-meta-keys' to the characters that the Option key
+types on a Swedish keyboard."
+  (interactive)
   (when (featurep 'ns)
     (setq ns-alternate-modifier 'meta
           ns-right-alternate-modifier 'none))
-  (keymap-set key-translation-map "M-8" "[")
-  (keymap-set key-translation-map "M-9" "]")
-  (keymap-set key-translation-map "M-(" "{")
-  (keymap-set key-translation-map "M-)" "}"))
+  (pcase-dolist (`(,key . ,char) my-swedish-mac-meta-keys)
+    (keymap-set key-translation-map key char)))
+
+(when (eq system-type 'darwin)
+  (my-swedish-mac-keyboard))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Editing
